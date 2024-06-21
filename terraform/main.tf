@@ -9,15 +9,15 @@ resource "tls_private_key" "example" {
 }
 
 # Create a key pair in AWS
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+resource "aws_key_pair" "deployer1" {
+  key_name   = "deployer-key1"
   public_key = tls_private_key.example.public_key_openssh
 }
 
 resource "aws_instance" "amazon_linux" {
   ami           = "ami-033fabdd332044f06"  # Amazon Linux 2 AMI for us-east-2
   instance_type = "t2.micro"
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = aws_key_pair.deployer1.key_name
   tags = {
     Name = "c8.local"
   }
@@ -26,7 +26,7 @@ resource "aws_instance" "amazon_linux" {
 resource "aws_instance" "ubuntu" {
   ami           = "ami-09040d770ffe2224f"  # Ubuntu 21.04 AMI for us-east-2
   instance_type = "t2.micro"
-  key_name      = aws_key_pair.deployer.key_name
+  key_name      = aws_key_pair.deployer1.key_name
   tags = {
     Name = "u21.local"
   }
