@@ -1,39 +1,36 @@
 ---
-- hosts: all
-  become: yes
+- name: Configure VMs
+  hosts: all
+  become: true
+  vars:
+    nginx_proxy_port: 19999
+
   tasks:
     - name: Disable SELinux
-      command: setenforce 0
-      when: ansible_os_family == "RedHat"
+      selinux:
+        state: disabled
 
-    - name: Disable SELinux in config file
-      replace:
-        path: /etc/selinux/config
-        regexp: '^SELINUX=.*$'
-        replace: 'SELINUX=disabled'
-      when: ansible_os_family == "RedHat"
-
-    - name: Disable firewalld
+    - name: Stop and disable firewalld
       service:
         name: firewalld
         state: stopped
-        enabled: no
-      when: ansible_os_family == "RedHat"
+        enabled: false
 
-- hosts: frontend
-  become: yes
+- name: Configure frontend group
+  hosts: frontend
+  become: true
   tasks:
     - name: Install nginx
-      apt:
+      yum:
         name: nginx
         state: present
-      when: ansible_os_family == "Debian"
 
-    - name: Configure nginx
+    - name: Configure nginx proxy
       template:
         src: nginx.conf.j2
-        dest: /etc/nginx/sites-available/default
-      notify: restart nginx
+        dest: /etc/nginx/nginx.conf
+      notify:
+        - restart nginx
 
   handlers:
     - name: restart nginx
@@ -41,18 +38,18 @@
         name: nginx
         state: restarted
 
-- hosts: backend
-  become: yes
+- name: Configure backend group
+  hosts: backend
+  become: true
   tasks:
     - name: Install Netdata
-      apt:
+      yum:
         name: netdata
         state: present
-      when: ansible_os_family == "Debian"
 
     - name: Start Netdata
-      service:
+      systemd:
         name: netdata
         state: started
-        enabled: yes
+        enabled: true
 
