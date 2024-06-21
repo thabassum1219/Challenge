@@ -1,0 +1,7 @@
+# vars/main.yml
+#apache_package: apache2
+  #nginx_package: nginx
+
+  #http_port_apache: 80
+  #http_port_nginx: 81
+
